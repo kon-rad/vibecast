@@ -1,0 +1,9 @@
+
+{
+  "name": "Network Live: AI Stream",
+  "description": "A live-streaming simulator where you broadcast to specialized AI groups like the 'Network School'. AI personas respond to your video and audio in real-time.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
