@@ -2,6 +2,20 @@
 import { AIPersona, Group } from './types';
 import { PERSONA_DATA } from './prompts';
 
+// Helper to get specific avatar or default
+const getAvatar = (id: string, name: string): string => {
+  switch (id) {
+    case 'balaji':
+      return '/balaji.jpg';
+    case 'jackson':
+      return '/JacksonSteger.jpg';
+    case 'joey':
+      return '/joey-ns.png';
+    default:
+      return `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`;
+  }
+};
+
 // Helper to get personas by array of IDs
 const getPersonas = (ids: string[]): AIPersona[] => {
   return ids.map(id => {
@@ -11,7 +25,7 @@ const getPersonas = (ids: string[]): AIPersona[] => {
       id,
       name: data.name,
       role: data.role,
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.name}`,
+      avatar: getAvatar(id, data.name),
       bio: `${data.backstory} Goal: ${data.goal}`,
       perspective: data.perspective,
       systemPrompt: data.systemInstruction
@@ -24,7 +38,7 @@ export const GROUPS: Group[] = [
     id: 'network-school',
     name: 'Network School',
     description: 'The founders and builders of the new Network State society.',
-    image: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&q=80&w=400',
+    image: '/ns-pic.webp',
     personas: getPersonas(['balaji', 'jackson', 'joey']),
     tags: ['Ruthless', 'Business', 'Critical'],
     status: 'HOT'
@@ -88,7 +102,7 @@ export const PERSONAS: AIPersona[] = Object.keys(PERSONA_DATA).map(key => {
     id: key,
     name: data.name,
     role: data.role,
-    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.name}`,
+    avatar: getAvatar(key, data.name),
     bio: `${data.backstory} Goal: ${data.goal}`,
     perspective: data.perspective,
     systemPrompt: data.systemInstruction

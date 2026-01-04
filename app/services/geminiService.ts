@@ -13,7 +13,8 @@ export class GeminiService {
     persona: AIPersona,
     imageDataBase64: string,
     transcript: string,
-    history: Comment[]
+    history: Comment[],
+    modelName: string = 'gemini-1.5-flash'
   ): Promise<string> {
     try {
       // Create a fresh instance to ensure the latest API key is used
@@ -22,7 +23,7 @@ export class GeminiService {
       const recentHistory = history.slice(-8).map(c => `${c.name}: ${c.text}`).join('\n');
 
       const response = await aiInstance.models.generateContent({
-        model: 'gemini-3-pro-preview',
+        model: modelName,
         config: {
           systemInstruction: {
             parts: [

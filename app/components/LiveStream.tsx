@@ -3,6 +3,7 @@ import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Group, Comment } from '../types';
 import { geminiService } from '../services/geminiService';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface LiveStreamProps {
   group: Group;
@@ -11,6 +12,7 @@ interface LiveStreamProps {
 
 const LiveStream: React.FC<LiveStreamProps> = ({ group, onExit }) => {
   const { user } = useAuth();
+  const { aiModel } = useSettings();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -24,6 +26,8 @@ const LiveStream: React.FC<LiveStreamProps> = ({ group, onExit }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [viewerCount] = useState(Math.floor(Math.random() * 100) + 40);
   const [userMessage, setUserMessage] = useState("");
+
+  const startTimeRef = useRef<number>(Date.now());
 
   // Setup Camera
   useEffect(() => {
@@ -40,6 +44,7 @@ const LiveStream: React.FC<LiveStreamProps> = ({ group, onExit }) => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
+        startTimeRef.current = Date.now(); // Mark start time
         setIsLive(true);
       } catch (err) {
         console.error("Camera error:", err);
@@ -165,7 +170,10 @@ const LiveStream: React.FC<LiveStreamProps> = ({ group, onExit }) => {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    if (!ctx) {
+      setIsProcessing(false);
+      return;
+    }
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const base64Image = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 
@@ -183,7 +191,8 @@ const LiveStream: React.FC<LiveStreamProps> = ({ group, onExit }) => {
         persona,
         base64Image,
         currentTranscript,
-        comments
+        comments,
+        aiModel
       );
 
       const newComment: Comment = {
@@ -201,10 +210,11 @@ const LiveStream: React.FC<LiveStreamProps> = ({ group, onExit }) => {
     } finally {
       setIsProcessing(false);
     }
-  }, [group.personas, transcriptBuffer, comments, isProcessing, isLive]);
+  }, [group.personas, transcriptBuffer, comments, isProcessing, isLive, aiModel]);
 
   useEffect(() => {
-    const interval = setInterval(processBroadcastChunk, 5000);
+    // Run every 10 seconds as requested
+    const interval = setInterval(processBroadcastChunk, 10000);
     const initial = setTimeout(processBroadcastChunk, 2000);
     return () => {
       clearInterval(interval);
@@ -221,28 +231,30 @@ const LiveStream: React.FC<LiveStreamProps> = ({ group, onExit }) => {
 
     try {
       // Import dynamically to avoid circular deps if any, or just standard import usage
-      const { collection, addDoc } = await import('firebase/firestore');
+      const { collection, addDoc, Timestamp } = await import('firebase/firestore');
       const { db } = await import('../firebase');
 
-      // Calculate duration roughly (current time - start time logic could be better but using comments span for now or just random for MVP functionality if start time not tracked)
-      // Let's assume start time was component mount.
-      // ideally we would have tracked startTime ref.
+      const endTime = Date.now();
+      const durationSeconds = Math.floor((endTime - startTimeRef.current) / 1000);
 
       const sessionData = {
         userId: user.uid,
         title: `${group.name} Session`,
         description: `Live broadcast with ${group.name} community.`,
-        timestamp: new Date(),
-        duration: '15:20', // Placeholder or calc from (Date.now() - startTime)
+        startTime: Timestamp.fromMillis(startTimeRef.current),
+        endTime: Timestamp.fromMillis(endTime),
+        durationSeconds: durationSeconds,
         commentCount: comments.length,
         vibe: '🔥 Intense', // Could analyze this
         status: 'COMPLETED',
         comments: comments // Saving the chat history!
       };
 
-      await addDoc(collection(db, 'streams'), sessionData);
+      const docRef = await addDoc(collection(db, 'streams'), sessionData);
+      console.log("Stream saved with ID: ", docRef.id);
     } catch (e) {
       console.error("Error saving stream:", e);
+      alert("Failed to save stream history. Check console for details.");
     } finally {
       onExit();
     }

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { ChevronLeft, LogOut, Trash2, Crown, ChevronRight } from 'lucide-react';
 
 interface ProfileProps {
@@ -8,6 +9,7 @@ interface ProfileProps {
 
 const Profile: React.FC<ProfileProps> = ({ onBack }) => {
     const { user, login, logout } = useAuth();
+    const { aiModel, setAiModel } = useSettings();
 
     return (
         <div className="flex flex-col h-full bg-[#0B0B0B] text-white relative">
@@ -72,6 +74,47 @@ const Profile: React.FC<ProfileProps> = ({ onBack }) => {
                         <button className="w-full text-center text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors py-2 border-t border-white/5 mt-2">
                             Manage Subscription
                         </button>
+                    </div>
+                </div>
+
+                {/* AI Settings */}
+                <div className="mb-8">
+                    <h3 className="text-[10px] font-bold text-[#666] tracking-widest mb-3 uppercase">AI Settings</h3>
+                    <div className="bg-[#161616] border border-white/5 rounded-2xl p-5 relative overflow-hidden">
+                        <div className="flex flex-col gap-3">
+                            <label className="text-xs font-bold text-white">Model Selection</label>
+                            <div className="grid grid-cols-1 gap-2">
+                                {(
+                                    [
+                                        'gemini-3-pro-preview',
+                                        'gemini-3-flash-preview',
+                                        'gemini-2.5-pro',
+                                        'gemini-2.5-flash',
+                                        'gemini-2.5-flash-preview-09-2025',
+                                        'gemini-2.5-flash-image',
+                                        'gemini-2.5-flash-native-audio-preview-12-2025',
+                                        'gemini-2.0-flash-exp',
+                                        'gemini-1.5-pro-latest',
+                                        'gemini-1.5-pro',
+                                        'gemini-1.5-flash'
+                                    ] as const
+                                ).map((model) => (
+                                    <button
+                                        key={model}
+                                        onClick={() => setAiModel(model)}
+                                        className={`w-full text-left p-3 rounded-xl border transition-all ${aiModel === model
+                                            ? 'bg-violet-600/20 border-violet-500 text-white'
+                                            : 'bg-white/5 border-white/5 text-gray-400 hover:border-white/10'
+                                            }`}
+                                    >
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-xs font-medium">{model}</span>
+                                            {aiModel === model && <div className="w-2 h-2 rounded-full bg-violet-500 shadow-lg shadow-violet-500/50" />}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
