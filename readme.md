@@ -12,6 +12,7 @@ The AI audience watches, listens, and responds with thoughtful comments that fee
 
 
 Demo
+https://vibecast.world/
 https://vibecast-production.up.railway.app/
 
 
@@ -20,7 +21,7 @@ Konrad Gnat
 
 Github
 
-https://github.com/mynk-s-rwt/TabCompass
+https://github.com/kon-rad/vibecast
 
 How To use
 Sign in with gmail 
