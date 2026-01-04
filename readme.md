@@ -3,6 +3,10 @@
 
 Project Name - VibeCast.world
 
+Video Demo:
+
+https://www.youtube.com/watch?v=pxQ-AZM31i0
+
 
 Description - VibeCast is a private live-streaming app that lets you talk on camera to curated groups of AI characters that react in real time.
 Its main use case is acting as a personal mastermind—a space to brainstorm ideas, get sharp feedback, receive coaching, or pitch your startup to legendary thinkers like Balaji and the Network School core team.
